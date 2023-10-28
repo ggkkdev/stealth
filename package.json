@@ -2,8 +2,8 @@
   "license": "MIT",
   "version": "1.0.0",
   "private": false,
-  "name": "solidity-hardhat-typescript-boilerplate",
-  "description": "Solidity Hardhat TypeScript Boilerplate",
+  "name": "stealth-address",
+  "description": "Implementation of stealth addresses",
   "scripts": {
     "prepare": "husky install",
     "start": "hardhat node",
@@ -23,7 +23,7 @@
     "test:trace": "hardhat test --trace",
     "test:fresh": "hardhat compile --force && hardhat test --no-compile --trace",
     "test:coverage": "hardhat coverage",
-    "build": "build.sh",
+    "build": "bin/build.sh",
     "analyze:static": "docker run -v $(pwd):/labs analyze:latest slither",
     "analyze:security": "docker run -v $(pwd):/labs analyze:latest myth analyze --solc-json mythril.config.json",
     "analyze:all": "analyze.sh",
@@ -53,7 +53,10 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@noble/secp256k1": "^1.7.1",
+    "merkletreejs": "^0.3.10"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
@@ -97,6 +100,7 @@
     "solidity-docgen": "0.6.0-beta.36",
     "ts-node": "^10.9.1",
     "typechain": "^8.3.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "secp256k1": "^4.0.3"
   }
 }

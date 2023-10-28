@@ -9,6 +9,12 @@ async function main() {
   const fooTokenAddress = await fooToken.getAddress();
   console.log(fooTokenName + ' deployed to:', fooTokenAddress);
 
+  const whitelistTokenFactory = await ethers.getContractFactory("WhitelistToken");
+  const whitelistToken = await whitelistTokenFactory.deploy( '100000000000000');
+  await whitelistToken.waitForDeployment();
+  const whitelistAddress = await whitelistToken.getAddress();
+  console.log(fooTokenName + ' deployed to:', whitelistAddress);
+
   const workshopName = 'Workshop';
   const workshopConstructorArgs: any[] = [fooTokenAddress];
   const workshopFactory = await ethers.getContractFactory(workshopName);
