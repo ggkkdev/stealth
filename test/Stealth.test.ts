@@ -7,9 +7,10 @@ import {
   StealthKeyRegistry__factory,
   WhitelistToken
 } from "../typechain-types";
-import { StealthAddress, StealthWallet } from "../stealth/stealth";
+import { StealthAddress } from "../stealth/stealth";
 import { expect } from "chai";
 import { HDNodeWallet, zeroPadValue } from "ethers";
+import { StealthWallet } from "../stealth/wallet";
 
 describe("Stealth", () => {
   let stealth: Stealth;
