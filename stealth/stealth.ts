@@ -88,7 +88,6 @@ export interface IScanInfo {
 export class StealthAddress {
 
   static tryUnlock(address: string, ephemeralpk: string, receiverWallet: StealthWallet) {
-    //const viewingPrivateKey = BigInt(_viewingPrivateKey.toString());
     const ephemeralpkPoint = Point.fromHex(ephemeralpk);
     const sharedSecret = ephemeralpkPoint.multiply(BigInt(receiverWallet.viewingKeyPair.privateKey));
     const s = sha256("0x" + sharedSecret.toHex());

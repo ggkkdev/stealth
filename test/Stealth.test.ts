@@ -24,9 +24,7 @@ describe("Stealth", () => {
   let receiver2: HDNodeWallet;
   let stealthWalletReceiver1: StealthWallet;
   let network: Network;
-  //let addresses: HardhatEthersSigner[];
 
-  // hooks
   before(async () => {
     [owner, sender, relayer] = await ethers.getSigners();
     network = await ethers.provider.getNetwork();
@@ -74,22 +72,6 @@ describe("Stealth", () => {
     expect(zeroPadValue(stealthAddress, 32)).to.equal(event!.topics[1]);
     expect(event?.address).to.equal(stealthContractAddress);
   });
-
-  /*  it("should scan keys", async () => {
-      const filter = stealth.filters.Announcement();
-      const events = await stealth.queryFilter(filter);
-      const infos = events.map(e => {
-        return { address: e.args[0], ephemeralpk: e.args[3] };
-      });
-      const wallets = await StealthAddress.scan(infos,stealthWalletReceiver1);
-      const tokenAddress = await tokenContract.getAddress();
-      const tx = await owner.sendTransaction({ to: wallets[0].address, value: 10n ** 18n });
-      await tx.wait();
-      const balanceBefore = await tokenContract.balanceOf(receiver2);
-      await stealth.connect(wallets[0]).withdrawToken(receiver2.address, tokenAddress);
-      const balance = await tokenContract.balanceOf(receiver2);
-      expect(balanceBefore + 10n).to.equal(balance);
-    });*/
 
   it("should scan keys", async () => {
     const filter = stealth.filters.Announcement();
