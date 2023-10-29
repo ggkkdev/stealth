@@ -1,10 +1,51 @@
-import { BigNumberish, computeAddress, sha256, SigningKey, Transaction, Wallet } from "ethers";
+import {
+  AbiCoder,
+  BigNumberish,
+  computeAddress,
+  keccak256,
+  sha256,
+  Signer,
+  SigningKey,
+  Transaction,
+  Wallet
+} from "ethers";
 import { ERC20, StealthKeyRegistry } from "../typechain-types";
 import { ethers } from "hardhat";
 import { CURVE, Point } from "@noble/secp256k1";
 import { StealthWallet } from "./wallet";
 
+/**
+ * Sign a transaction for a metawithdrawal
+ * @param {object} signer Ethers Wallet or other Signer type
+ * @param {number|string} chainId Chain identifier where contract is deployed
+ * @param {string} contract StealthApp contract address
+ * @param {string} acceptor Withdrawal destination
+ * @param {string} token Address of token being withdrawn
+ * @param {string} sponsor Address of relayer
+ * @param {number|string} fee Amount sent to sponsor
+ * @param {string|array} data Call data to be past to post withdraw hook
+ */
+export const signMetaWithdrawal = async (
+  signer:Wallet|Signer,
+  chainId:bigint,
+  contract:string,
+  acceptor:string,
+  token:string,
+  sponsor:string,
+  fee:number,
+  data = '0x'
+) => {
+  const abicoder=AbiCoder.defaultAbiCoder()
+  const digest = keccak256(
+    abicoder.encode(
+      ['uint256', 'address', 'address', 'address', 'address', 'uint256', 'bytes'],
+      [chainId, contract, acceptor, token, sponsor, fee, data]
+    )
+  );
 
+  const rawSig = await signer.signMessage(ethers.getBytes(digest));
+  return ethers.Signature.from(rawSig)
+};
 export const getPubKeyFromAddress = async (keyRegistry: StealthKeyRegistry, tokenContract: ERC20, recipient: string) => {
   const { spendingPubKey, viewingPubKey } = await keyRegistry.stealthKeys(recipient);
   if (spendingPubKey) {
