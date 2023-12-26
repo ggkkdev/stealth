@@ -26,25 +26,18 @@ import { StealthWallet } from "./wallet";
  * @param {string|array} data Call data to be past to post withdraw hook
  */
 export const signMetaWithdrawal = async (
-  signer:Wallet|Signer,
-  chainId:bigint,
-  contract:string,
-  acceptor:string,
-  token:string,
-  sponsor:string,
-  fee:number,
-  data = '0x'
-) => {
-  const abicoder=AbiCoder.defaultAbiCoder()
+  signer: Wallet | Signer, chainId: bigint, contract: string, acceptor: string, token: string,
+  sponsor: string, fee: number, data = "0x") => {
+  const abicoder = AbiCoder.defaultAbiCoder();
   const digest = keccak256(
     abicoder.encode(
-      ['uint256', 'address', 'address', 'address', 'address', 'uint256', 'bytes'],
+      ["uint256", "address", "address", "address", "address", "uint256", "bytes"],
       [chainId, contract, acceptor, token, sponsor, fee, data]
     )
   );
 
   const rawSig = await signer.signMessage(ethers.getBytes(digest));
-  return ethers.Signature.from(rawSig)
+  return ethers.Signature.from(rawSig);
 };
 export const getPubKeyFromAddress = async (keyRegistry: StealthKeyRegistry, tokenContract: ERC20, recipient: string) => {
   const { spendingPubKey, viewingPubKey } = await keyRegistry.stealthKeys(recipient);
