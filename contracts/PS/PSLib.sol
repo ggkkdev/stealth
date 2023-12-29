@@ -8,17 +8,7 @@ import "./BN256G1.sol";
  * @dev A library for verifying PS signatures.
  */
 library PSLib {
-    //event Verification(uint c, uint s, BN256G1.G1Point ymink, BN256G1.G2Point sigma2, BN256G1.G2Point sigma1, BN256G1.G1Point gtildeneg, BN256G1.G1Point X, BN256G1.G1Point Y, bool resultPairing, bool resultHash);
 
-    /*    BN256G1.G1Point gtildeneg;
-        BN256G1.G1Point X;
-        BN256G1.G1Point Y;*/
-
-    /*    constructor(BN256G1.G1Point memory _gtildeneg, BN256G1.G1Point memory _X, BN256G1.G1Point memory _Y) public {
-            X = _X;
-            Y = _Y;
-            gtildeneg = _gtildeneg;
-        }*/
     function test() public view returns (uint){
         return 4 + 5;
     }
