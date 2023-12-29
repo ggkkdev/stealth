@@ -1,6 +1,6 @@
 import {
   AbiCoder,
-  BigNumberish,
+  BigNumberish, BytesLike,
   computeAddress,
   keccak256,
   sha256,
@@ -9,7 +9,7 @@ import {
   Transaction,
   Wallet
 } from "ethers";
-import { ERC20, StealthKeyRegistry } from "../typechain-types";
+import { ERC20, Stealth, StealthGroup, StealthKeyRegistry } from "../typechain-types";
 import { ethers } from "hardhat";
 import { CURVE, Point } from "@noble/secp256k1";
 import { StealthWallet } from "./wallet";
@@ -17,28 +17,19 @@ import { StealthWallet } from "./wallet";
 /**
  * Sign a transaction for a metawithdrawal
  * @param {object} signer Ethers Wallet or other Signer type
- * @param {number|string} chainId Chain identifier where contract is deployed
- * @param {string} contract StealthApp contract address
- * @param {string} acceptor Withdrawal destination
- * @param {string} token Address of token being withdrawn
- * @param {string} sponsor Address of relayer
- * @param {number|string} fee Amount sent to sponsor
- * @param {string|array} data Call data to be past to post withdraw hook
+ * @param {BytesLike} digest digest to sign
  */
-export const signMetaWithdrawal = async (
-  signer: Wallet | Signer, chainId: bigint, contract: string, acceptor: string, token: string,
-  sponsor: string, fee: number, data = "0x") => {
-  const abicoder = AbiCoder.defaultAbiCoder();
-  const digest = keccak256(
-    abicoder.encode(
-      ["uint256", "address", "address", "address", "address", "uint256", "bytes"],
-      [chainId, contract, acceptor, token, sponsor, fee, data]
-    )
-  );
-
-  const rawSig = await signer.signMessage(ethers.getBytes(digest));
+export const signMetaWithdrawal = async (signer: Wallet | Signer, digest:BytesLike) => {
+  // @ts-ignore
+  const rawSig = await signer.signingKey.sign(digest);
   return ethers.Signature.from(rawSig);
 };
+
+export const getDigest=( chainId: bigint, contract: string, acceptor: string, token: string,
+                             sponsor: string, fee: number)=>{
+  const digest = ethers.solidityPackedKeccak256(["uint", "address", "address", "address", "address", "uint"], [chainId, contract, acceptor, token, sponsor, fee]);
+  return ethers.getBytes(digest);
+}
 export const getPubKeyFromAddress = async (keyRegistry: StealthKeyRegistry, tokenContract: ERC20, recipient: string) => {
   const { spendingPubKey, viewingPubKey } = await keyRegistry.stealthKeys(recipient);
   if (spendingPubKey) {
@@ -90,7 +81,13 @@ export class StealthAddress {
     return { match: address == stealthAddress, privateKey: stealthsk };
   }
 
-  static async scan(infos: IScanInfo[], receiverWallet: StealthWallet) {
+  static async scan(stealth:Stealth|StealthGroup, receiverWallet: StealthWallet) {
+    const filter = stealth.filters.Announcement();
+    const events = await stealth.queryFilter(filter);
+    const infos: IScanInfo[] = events.map(e => {
+      return { address: e.args[0], ephemeralpk: e.args[3] };
+    });
+
     const unlocked = infos.map(e => {
       return this.tryUnlock(e.address, e.ephemeralpk, receiverWallet);
     }).filter(e => e.match).map(e => new Wallet("0x" + (BigInt(e.privateKey).toString(16))).connect(ethers.provider));
@@ -101,7 +98,6 @@ export class StealthAddress {
   static async generateStealthAddress(
     keyRegistry: StealthKeyRegistry,
     tokenContract: ERC20,
-    amount: BigNumberish,
     recipient: string
   ) {
     const keyPair = await getPubKeyFromAddress(keyRegistry, tokenContract, recipient);
