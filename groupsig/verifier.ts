@@ -2,8 +2,7 @@
 import { ethers } from "hardhat";
 import { IGPK, ISignature } from "./interfaces";
 import { BN256G1, PS } from "../typechain-types";
-import { G1ToAffineStruct, G2ToAffineStruct, toG1AffineObject, toG2AffineObject } from "./utils";
-import { expect } from "chai";
+import { psSigToStruct, toG1AffineObject, toG2AffineObject } from "./utils";
 
 
 export class PSVerifier {
@@ -37,8 +36,7 @@ export class PSVerifier {
 
   static async verifySol(bn128: any, psContract: PS, gpk: IGPK, signature: ISignature, m: Uint8Array) {
     // @ts-ignore
-    const tx = await psContract.verify(bn128.Fr.toObject(signature.c), G1ToAffineStruct(bn128, signature.ymink), bn128.Fr.toObject(signature.s),
-      G2ToAffineStruct(bn128, signature.sigma1random), G2ToAffineStruct(bn128, signature.sigma2random), m);
+    const tx = await psContract.verify(psSigToStruct(bn128,signature), m);
     // @ts-ignore
     const { logs, gasUsed } = await tx.wait();
     console.log(`Gas used for ps verification function ${gasUsed.toString()}`)

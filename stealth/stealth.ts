@@ -1,14 +1,4 @@
-import {
-  AbiCoder,
-  BigNumberish, BytesLike,
-  computeAddress,
-  keccak256,
-  sha256,
-  Signer,
-  SigningKey,
-  Transaction,
-  Wallet
-} from "ethers";
+import { BytesLike, computeAddress, sha256, Signer, SigningKey, Transaction, Wallet } from "ethers";
 import { ERC20, Stealth, StealthGroup, StealthKeyRegistry } from "../typechain-types";
 import { ethers } from "hardhat";
 import { CURVE, Point } from "@noble/secp256k1";
@@ -28,6 +18,10 @@ export const signMetaWithdrawal = async (signer: Wallet | Signer, digest:BytesLi
 export const getDigest=( chainId: bigint, contract: string, acceptor: string, token: string,
                              sponsor: string, fee: number)=>{
   const digest = ethers.solidityPackedKeccak256(["uint", "address", "address", "address", "address", "uint"], [chainId, contract, acceptor, token, sponsor, fee]);
+  return ethers.getBytes(digest);
+}
+export const getTokenDigest=( chainId: bigint, acceptor: string, token: string, amount:bigint)=>{
+  const digest = ethers.solidityPackedKeccak256(["uint", "address", "address", "uint"], [chainId,  token, acceptor, amount]);
   return ethers.getBytes(digest);
 }
 export const getPubKeyFromAddress = async (keyRegistry: StealthKeyRegistry, tokenContract: ERC20, recipient: string) => {

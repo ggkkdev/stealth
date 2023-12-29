@@ -14,8 +14,12 @@ contract Stealth is AStealth {
    * @param _tokenAddr Address of the ERC20 token being withdrawn
    */
     function withdrawToken(address _acceptor, address _tokenAddr) external {
-        _withdrawTokenInternal(msg.sender, _acceptor, _tokenAddr, address(0), 0);
+        uint _withdrawalAmount = _prewithdrawTokenInternal(msg.sender, _acceptor, _tokenAddr, address(0), 0);
+        //uint _withdrawalAmount = _prewithdrawTokenInternal(msg.sender, _acceptor, _tokenAddr);
+        IERC20(_tokenAddr).transfer(_acceptor, _withdrawalAmount);
+        emit TokenWithdrawal(msg.sender, _acceptor, _withdrawalAmount, _tokenAddr);
     }
+
 
     /**
  * @notice Withdraw an ERC20 token payment on behalf of a stealth address via signed authorization
@@ -39,8 +43,12 @@ contract Stealth is AStealth {
         bytes32 _s
     ) external {
         bytes32 _digest = getDigest(_stealthAddr, _acceptor, _tokenAddr, _sponsor, _sponsorFee);
-        _validateWithdrawSignature(block.chainid,_stealthAddr, _digest, _v, _r, _s);
-        _withdrawTokenInternal(_stealthAddr, _acceptor, _tokenAddr, address(0), 0);
+        _validateWithdrawSignature(block.chainid, _stealthAddr, _digest, _v, _r, _s);
+        uint _withdrawalAmount = _prewithdrawTokenInternal(_stealthAddr, _acceptor, _tokenAddr, address(0), 0);
+        IERC20(_tokenAddr).transfer(_acceptor, _withdrawalAmount);
+        if (_sponsorFee > 0) {
+            IERC20(_tokenAddr).transfer(address(0), 0);
+        }
     }
 
 }

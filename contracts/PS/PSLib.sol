@@ -9,10 +9,6 @@ import "./BN256G1.sol";
  */
 library PSLib {
 
-    function test() public view returns (uint){
-        return 4 + 5;
-    }
-
     /// @dev Verify PS group signatures
     function verify(BN256G1.G1Point storage gtildeneg, BN256G1.G1Point storage X, BN256G1.G1Point storage Y, uint c, BN256G1.G1Point calldata ymink, uint s, BN256G1.G2Point calldata sigma1, BN256G1.G2Point calldata sigma2, bytes32 message) internal returns (bool){
         (bool resultPairing) = checkPairing(c, ymink, s, sigma1, sigma2, gtildeneg, X, Y);

@@ -10,6 +10,14 @@ import "./PSLib.sol";
  */
 contract PS {
 
+    struct PSSignature {
+        uint c;
+        BN256G1.G1Point ymink;
+        uint s;
+        BN256G1.G2Point sigma1;
+        BN256G1.G2Point sigma2;
+    }
+
     event Verification(uint c, uint s, BN256G1.G1Point ymink, BN256G1.G2Point sigma2, BN256G1.G2Point sigma1, bool result);
 
     BN256G1.G1Point gtildeneg;
@@ -23,9 +31,9 @@ contract PS {
     }
 
     /// @dev Verify PS group signatures
-    function verify(uint c, BN256G1.G1Point calldata ymink, uint s, BN256G1.G2Point calldata sigma1, BN256G1.G2Point calldata sigma2, bytes32 message) public returns (bool){
-        (bool result) = PSLib.verify(gtildeneg, X, Y, c, ymink, s, sigma1, sigma2, message);
-        emit Verification(c, s, ymink, sigma2, sigma1,result);
+    function verify(PSSignature calldata signature,bytes32 message) public returns (bool){
+        (bool result) = PSLib.verify(gtildeneg, X, Y, signature.c, signature.ymink, signature.s, signature.sigma1, signature.sigma2, message);
+        emit Verification(signature.c, signature.s, signature.ymink, signature.sigma2, signature.sigma1, result);
         return result;
     }
 

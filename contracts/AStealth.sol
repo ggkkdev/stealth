@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./PS/PS.sol";
 
 abstract contract AStealth is Ownable {
     // =========================================== Events ============================================
@@ -55,6 +56,7 @@ abstract contract AStealth is Ownable {
         _digest = keccak256(abi.encodePacked(block.chainid, address(this), _acceptor, _tokenAddr, _sponsor, _sponsorFee));
     }
 
+
     /**
 * @notice Low level withdrawal function that should only be called after safety checks
    * @param _stealthAddr The stealth address whose token balance will be withdrawn
@@ -63,13 +65,12 @@ abstract contract AStealth is Ownable {
    * @param _sponsor Address which is compensated for submitting the withdrawal tx
    * @param _sponsorFee Amount of the token to pay to the sponsor
    */
-    function _withdrawTokenInternal(
+    function _prewithdrawTokenInternal(
         address _stealthAddr,
         address _acceptor,
         address _tokenAddr,
         address _sponsor,
-        uint256 _sponsorFee
-    ) internal {
+        uint256 _sponsorFee) internal returns (uint) {
         uint256 _amount = tokenPayments[_stealthAddr][_tokenAddr];
 
         // also protects from underflow
@@ -77,14 +78,9 @@ abstract contract AStealth is Ownable {
 
         uint256 _withdrawalAmount = _amount - _sponsorFee;
         delete tokenPayments[_stealthAddr][_tokenAddr];
-        emit TokenWithdrawal(_stealthAddr, _acceptor, _withdrawalAmount, _tokenAddr);
-
-        IERC20(_tokenAddr).transfer(_acceptor, _withdrawalAmount);
-
-        if (_sponsorFee > 0) {
-            IERC20(_tokenAddr).transfer(_sponsor, _sponsorFee);
-        }
+        return _amount;
     }
+
 
     /**
  * @notice Internal method which recovers address from signature of the parameters and throws if not _stealthAddr

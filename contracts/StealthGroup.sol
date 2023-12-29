@@ -5,15 +5,10 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./PS/PS.sol";
 import "./AStealth.sol";
+import "./GroupSigToken.sol";
+import "./IGroupSigToken.sol";
 
 contract StealthGroup is AStealth {
-
-    // ======================================= State variables =======================================
-    PS ps;
-
-    constructor(address psAddress) {
-        ps = PS(psAddress);
-    }
 
     /*    *//**
      * @notice Withdraw an ERC20 token payment sent to a stealth address
@@ -38,12 +33,12 @@ contract StealthGroup is AStealth {
    */
     function withdrawTokenOnBehalf(
         address _stealthAddr, address _acceptor, address _tokenAddr, address _sponsor, uint256 _sponsorFee, uint8 _v, bytes32 _r, bytes32 _s,
-        uint c, BN256G1.G1Point calldata ymink, uint s, BN256G1.G2Point calldata sigma1, BN256G1.G2Point calldata sigma2
-    ) external {
+        PS.PSSignature calldata psSignature) external {
         bytes32 _digest = getDigest( _stealthAddr, _acceptor, _tokenAddr, _sponsor, _sponsorFee);
-        require(ps.verify(c, ymink, s, sigma1, sigma2, _digest), "group signature not correct");
         _validateWithdrawSignature(block.chainid,_stealthAddr, _digest, _v, _r, _s);
-        _withdrawTokenInternal(_stealthAddr, _acceptor, _tokenAddr, address(0), 0);
+        uint _withdrawalAmount = _prewithdrawTokenInternal(_stealthAddr, _acceptor, _tokenAddr, address(0), 0);
+        IGroupSigToken(_tokenAddr).transferVerified(psSignature,_acceptor, _withdrawalAmount);
+        emit TokenWithdrawal(_stealthAddr, _acceptor, _withdrawalAmount, _tokenAddr);
     }
 
 }
