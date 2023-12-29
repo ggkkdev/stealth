@@ -47,7 +47,7 @@ contract Stealth is AStealth {
         uint _withdrawalAmount = _prewithdrawTokenInternal(_stealthAddr, _acceptor, _tokenAddr, address(0), 0);
         IERC20(_tokenAddr).transfer(_acceptor, _withdrawalAmount);
         if (_sponsorFee > 0) {
-            IERC20(_tokenAddr).transfer(address(0), 0);
+            IERC20(_tokenAddr).transfer(_sponsor, _sponsorFee);
         }
     }
 

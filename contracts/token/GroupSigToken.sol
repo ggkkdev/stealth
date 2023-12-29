@@ -7,7 +7,7 @@ pragma solidity ^0.8.18;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./PS/PS.sol";
+import "../PS/PS.sol";
 
 contract GroupSigToken is ERC20, Ownable {
     PS ps;
@@ -36,12 +36,4 @@ contract GroupSigToken is ERC20, Ownable {
     function mint(address account, uint256 amount) public onlyOwner {
         _mint(account, amount);
     }
-
-    function transfer(address to, uint256 amount) public override returns (bool) {
-        address owner = _msgSender();
-        emit Transfer(owner, to, amount);
-        _transfer(owner, to, amount);
-        return true;
-    }
-
 }

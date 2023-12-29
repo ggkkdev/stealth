@@ -5,7 +5,7 @@ import {
   Stealth__factory,
   StealthKeyRegistry,
   StealthKeyRegistry__factory,
-  WhitelistToken
+  SimpleToken
 } from "../typechain-types";
 import { getDigest, signMetaWithdrawal, StealthAddress } from "../stealth/stealth";
 import { expect } from "chai";
@@ -16,7 +16,7 @@ describe("Stealth", () => {
   let stealth: Stealth;
   let keyRegistry: StealthKeyRegistry;
   let stealthContractAddress: string;
-  let tokenContract: WhitelistToken;
+  let tokenContract: SimpleToken;
   let owner: HardhatEthersSigner;
   let stealthOwner: any;
   let sender: HardhatEthersSigner;
@@ -34,13 +34,13 @@ describe("Stealth", () => {
     receiver2 = HDNodeWallet.createRandom().connect(ethers.provider);
     const stealthFactory = (await ethers.getContractFactory("Stealth")) as Stealth__factory;
     const keyRegistryFactory = (await ethers.getContractFactory("StealthKeyRegistry")) as StealthKeyRegistry__factory;
-    const tokenFactory = await ethers.getContractFactory("WhitelistToken");
+    const tokenFactory = await ethers.getContractFactory("SimpleToken");
     const tx = await owner.sendTransaction({ to: receiver1.address, value: 10n ** 18n });
     await tx.wait();
     const tx2 = await owner.sendTransaction({ to: relayer.address, value: 10n ** 18n });
     await tx2.wait();
 
-    tokenContract = <WhitelistToken>await tokenFactory.deploy(10n ** 18n);
+    tokenContract = <SimpleToken>await tokenFactory.deploy("simple token", "STN");
     stealth = await stealthFactory.deploy();
     keyRegistry = await keyRegistryFactory.deploy();
     stealthContractAddress = await stealth.getAddress();
@@ -79,7 +79,7 @@ describe("Stealth", () => {
     stealthOwner = wallets[0];
   });
   it("should withdraw on behalf", async () => {
-    const relayerTokenFee = 10;
+    const relayerTokenFee = 0;
     const tokenAddress = await tokenContract.getAddress();
     const chainId = network.chainId;
     const digest=getDigest(chainId, stealthContractAddress, receiver2.address, tokenAddress, relayer.address, relayerTokenFee)

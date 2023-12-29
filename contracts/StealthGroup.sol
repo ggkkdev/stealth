@@ -5,8 +5,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./PS/PS.sol";
 import "./AStealth.sol";
-import "./GroupSigToken.sol";
-import "./IGroupSigToken.sol";
+import "./token/IGroupSigToken.sol";
 
 contract StealthGroup is AStealth {
 
